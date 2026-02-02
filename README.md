@@ -53,8 +53,12 @@ Nova TV Interview Assignment: data analysis, deep-learning and transformer-based
 
 ### Build and run the prediction service (Docker)
 
-- Build (from repo root): `docker build -f service/Dockerfile -t novatv-model .`
+- **Docker**: Any recent Docker (e.g. `docker.io` 28.x on Ubuntu) is fine. If you get "permission denied", use `sudo docker` or add your user to the `docker` group: `sudo usermod -aG docker $USER` (then log out and back in).
+- Build (from repo root): `docker build -f service/Dockerfile -t novatv-model .` (first build may take several minutes while dependencies download).
 - Run: `docker run -p 8000:8000 -v $(pwd)/models:/app/models novatv-model`
+- **Verify**: With the container running, open another terminal and run:
+  - `curl -s http://localhost:8000/health` → `{"status":"ok"}`
+  - `curl -s -X POST http://localhost:8000/predict -H "Content-Type: application/json" -d '{"timeslot_datetime_from":["2024-01-15 20:00:00"],"channel_id":["3"]}'` → `{"predictions":[<float>]}`
 - The service expects a trained model in `models/` (run Task 2 first, or mount a volume with `task2_best.pt`, `task2_scaler.pkl`, `task2_channel_encoder.pkl`, `task2_feature_names.json`).
 - To use versioned models (after `daily_retrain.py`), run with `-e MODEL_DIR=/app/models/current` so the app loads from the `current` symlink.
 

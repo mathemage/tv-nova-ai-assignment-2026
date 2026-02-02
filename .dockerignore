@@ -1,0 +1,20 @@
+# Reduce build context: exclude data, venv, and large dirs (models mounted at run time)
+.venv/
+venv/
+__pycache__/
+*.pyc
+.git/
+.gitignore
+data/
+models/
+*.pt
+*.pkl
+.pytest_cache/
+.coverage
+htmlcov/
+*.md
+!README.md
+docs/
+notebooks/
+tests/
+.cursor/
