@@ -56,6 +56,7 @@ Nova TV Interview Assignment: data analysis, deep-learning and transformer-based
 - Build (from repo root): `docker build -f service/Dockerfile -t novatv-model .`
 - Run: `docker run -p 8000:8000 -v $(pwd)/models:/app/models novatv-model`
 - The service expects a trained model in `models/` (run Task 2 first, or mount a volume with `task2_best.pt`, `task2_scaler.pkl`, `task2_channel_encoder.pkl`, `task2_feature_names.json`).
+- To use versioned models (after `daily_retrain.py`), run with `-e MODEL_DIR=/app/models/current` so the app loads from the `current` symlink.
 
 ### API
 
