@@ -204,4 +204,12 @@ cython_debug/
 # Marimo
 marimo/_static/
 marimo/_lsp/
-__marimo__/
+__marimo__
+
+# Assignment data and trained models
+data/*.csv
+models/*.pt
+models/*.pkl
+models/*.json
+models/v_*/
+models/current/
