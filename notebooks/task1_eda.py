@@ -66,8 +66,10 @@ def run_eda() -> pd.DataFrame:
     if CHANNEL_ID_COL in df.columns:
         ch = df.groupby(CHANNEL_ID_COL).agg(
             rows=pd.NamedAgg(column=CHANNEL_ID_COL, aggfunc="count"),
-            **{TARGET_COL: ["mean", "std"]} if TARGET_COL in df.columns else {},
         )
+        if TARGET_COL in df.columns:
+            ch2 = df.groupby(CHANNEL_ID_COL)[TARGET_COL].agg(["mean", "std"])
+            ch = ch.join(ch2)
         print("\nBy channel:")
         print(ch)
 
