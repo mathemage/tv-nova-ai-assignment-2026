@@ -34,6 +34,8 @@ Nova TV Interview Assignment: data analysis, deep-learning and transformer-based
 - **Explainability**:  
   `python -m src.explain_task2 --model_dir models`
 - **Artifacts**: `models/task2_best.pt`, `task2_scaler.pkl`, `task2_channel_encoder.pkl`, `task2_feature_names.json`, `task2_metrics.json`.
+- **Summary**: [docs/task2_summary.md](docs/task2_summary.md) (model choice, features, validation metrics, future
+  steps).
 - **Training/inference cost**: See `models/task2_metrics.json` (train time, n_params, inference latency per sample). Documented in this README: small MLP/LSTM, low cost.
 - **Future improvements (Task 2)**: More time features, channel-specific models, handling cold-start for new channels or timeslots; optional SHAP in addition to gradient-based importance.
 
@@ -90,6 +92,6 @@ Nova TV Interview Assignment: data analysis, deep-learning and transformer-based
 - `scripts/` – Download, synthetic data, daily retrain, rollback.
 - `tests/` – Pytest tests for pipeline and API.
 - `notebooks/` – Task 1 EDA script.
-- `docs/` – Task 1 conclusions, Task 3 summary.
+- `docs/` – Task 1 conclusions, Task 2 summary, Task 3 summary.
 
 All work is executable locally (clone and run); no assumption on OS beyond Python and Docker.
