@@ -35,3 +35,15 @@
 - Missing or invalid `timeslot datetime from` rows are dropped after parsing.
 - CSV read reports mixed types in some columns (e.g. ch3__f_10, ch54__f_10); consider `dtype` or `low_memory=False` when loading.
 - Run `python notebooks/task1_eda.py` to refresh statistics and then update this document with concrete numbers from your run.
+
+## Modeling implications (beginner-friendly)
+
+- Treat **time as a primary signal**: include hour, day-of-week, and month features; consider categorical bins or cyclic
+  encodings for hour/month.
+- **Channel effects dominate**: model channel as a strong categorical feature; consider per-channel models or explicit
+  interactions with time features.
+- Use `share 15 54 3mo mean` as a **trend baseline**; compare your model to it and consider modeling residuals on top of
+  the baseline.
+- **Variance differs by channel** (channel 3 is volatile): evaluate errors per channel and consider robust loss or
+  per-channel weighting if needed.
+- Prefer **time-based splits** (train on earlier periods, validate on later) to avoid leakage from future time patterns.
