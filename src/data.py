@@ -17,7 +17,8 @@ DATA_URLS = [
 
 # Column names from assignment
 TIMESLOT_COL = "timeslot datetime from"
-MAIN_INDENT_COL = "main indent"
+# MAIN_INDENT_COL = "main indent"
+MAIN_INDENT_COL = "main_ident"
 CHANNEL_ID_COL = "channel id"
 TARGET_COL = "share 15 54"
 TARGET_3MO_COL = "share 15 54 3mo mean"
