@@ -35,3 +35,16 @@
 
 - Add lag/rolling features, program metadata, or per-channel heads.
 - Compare to the smaller MLP to trade accuracy for speed.
+
+## Explainability notes
+
+- `src/explain_task2.py` loads the saved Task 2 model + artifacts, rebuilds Task 2 features, scales them, then computes
+  mean absolute gradients per feature to rank importance.
+- Gradient-based importance = average $\left| \frac{\partial \mathrm{output}}{\partial \mathrm{feature}} \right|$ over
+  sampled rows; higher means the prediction is more sensitive to that feature (in scaled input space), not causal
+  influence.
+- "Features sorted by importance" are simply the features ordered by those mean |grad| scores, descending.
+- The sample output shows `channel_id_enc` as the most influential, followed by time-derived features (`hour_sin`,
+  `hour_cos`, `dow_sin`, `dow_cos`, etc.), indicating strong channel and temporal effects.
+- The `DtypeWarning` in `src/data.py` comes from `pd.read_csv` seeing mixed types in unused columns; it does not affect
+  Task 2 features but can be silenced via explicit `dtype` or `low_memory=False`.
