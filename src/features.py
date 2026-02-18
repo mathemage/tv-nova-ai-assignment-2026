@@ -82,8 +82,9 @@ def build_time_features(df: pd.DataFrame) -> pd.DataFrame:
     Returns
     -------
     pd.DataFrame
-        A copy of ``df`` with eight additional columns (see above).
-        The original DataFrame is never modified in place.
+        A copy of ``df`` with eight additional columns if ``TIMESLOT_COL`` is
+        present, otherwise an unchanged copy of ``df``. The original DataFrame
+        is never modified in place.
     """
     out = df.copy()
     if TIMESLOT_COL not in out.columns:
@@ -131,9 +132,9 @@ def features_task2(df: pd.DataFrame, channel_encoder: LabelEncoder = None, fit: 
     Parameters
     ----------
     df : pd.DataFrame
-        Input DataFrame.  Must contain ``TIMESLOT_COL`` for time features and
-        ``TARGET_COL`` for the target array ``y``; both columns are optional
-        at inference time.
+        Input DataFrame.  May optionally contain ``TIMESLOT_COL`` to generate
+        time features and ``TARGET_COL`` for the target array ``y``; both
+        columns are optional at inference time.
     channel_encoder : LabelEncoder, optional
         Pre-fitted encoder for the channel-ID column.  Required when
         ``fit=False``; ignored when ``fit=True``.
@@ -219,9 +220,9 @@ def features_task3(df: pd.DataFrame, channel_encoder=None, scaler_3mo: StandardS
         Pre-fitted encoder for the channel-ID column.  Required when
         ``fit=False``; ignored when ``fit=True``.
     scaler_3mo : StandardScaler, optional
-        Pre-fitted scaler for the 3-month mean column.  Required when
-        ``fit=False`` and ``TARGET_3MO_COL`` is present; ignored when
-        ``fit=True``.
+        Pre-fitted scaler for the 3-month mean column.  Recommended when
+        ``fit=False`` and ``TARGET_3MO_COL`` is present; if omitted, the raw
+        (unscaled) values are used. Ignored when ``fit=True``.
     fit : bool, default True
         If ``True``, fit new encoders/scalers from ``df``.
         If ``False``, transform using the provided objects.
