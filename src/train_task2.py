@@ -1,6 +1,94 @@
-"""
-Task 2: Train MLP (primary) and MLPLarge (most complex for Task 4).
-Time-based split, MSE loss, Adam, early stopping. Save best model and scaler/encoder.
+"""Task 2: Train MLP (primary) and MLPLarge (most complex for Task 4).
+
+This script trains deep learning models to predict TV viewership share (share 15 54)
+from temporal and channel features, WITHOUT using the 3-month rolling mean feature.
+
+Training Strategy
+-----------------
+- Time-based train/validation split (last 20% for validation)
+- MSE loss with Adam optimizer
+- Early stopping based on validation RMSE
+- Saves best model checkpoint, scaler, and feature metadata
+
+Usage
+-----
+Basic training with defaults::
+
+    python src/train_task2.py
+
+Custom configuration::
+
+    python src/train_task2.py --model mlp --epochs 100 --patience 10 \\
+                               --batch_size 64 --lr 1e-3
+
+Command-line Arguments
+----------------------
+--data_path : str, optional
+    Path to CSV data file (default: data/data.csv)
+--model : {'mlp', 'mlp_large'}, default='mlp_large'
+    Model architecture to train
+--epochs : int, default=100
+    Maximum training epochs
+--patience : int, default=10
+    Early stopping patience (epochs without improvement)
+--batch_size : int, default=64
+    Training batch size
+--lr : float, default=1e-3
+    Learning rate for Adam optimizer
+--out_dir : str, default='models'
+    Directory to save trained model and artifacts
+--val_frac : float, default=0.2
+    Fraction of data for validation
+
+Example Output
+--------------
+Training run with synthetic data (5000 samples, 5 epochs)::
+
+    Loading data...
+    Features: ['hour', 'day_of_week', 'month', 'weekend', 'hour_sin', 
+               'hour_cos', 'dow_sin', 'dow_cos', 'channel_id_enc'], X.shape=(5000, 9)
+    Train 4000, Val 1000
+    Metrics: {
+        'best_epoch': 3, 
+        'val_rmse': 3.035895808586932, 
+        'val_mae': 2.450582981109619, 
+        'train_time_sec': 0.92, 
+        'n_params': 43777, 
+        'inference_latency_ms_per_sample': 0.1109
+    }
+    Saved model to models/task2_best.pt
+
+Outputs
+-------
+The script saves the following artifacts to --out_dir:
+
+- **task2_best.pt** : Model checkpoint with state dict and metadata
+- **task2_scaler.pkl** : StandardScaler for feature normalization
+- **task2_channel_encoder.pkl** : LabelEncoder for channel IDs
+- **task2_feature_names.json** : List of feature names in order
+- **task2_metrics.json** : Training metrics and model statistics
+
+Model Performance
+-----------------
+Typical metrics on synthetic data:
+- Validation RMSE: ~3.0
+- Validation MAE: ~2.4
+- Training time: <1 second (CPU, 5000 samples)
+- Inference latency: ~0.1 ms per sample
+- Parameters: ~44K (MLPLarge), ~20K (MLP)
+
+Notes
+-----
+- Uses time-based split to prevent data leakage
+- Features are standardized (StandardScaler)
+- Model trained without share 15 54 3mo mean feature
+- Inference speed measured on first sample (100 iterations)
+
+See Also
+--------
+models_task2.py : Model architectures
+predict_task2.py : Inference using trained models
+features.py : Feature engineering functions
 """
 import argparse
 import json

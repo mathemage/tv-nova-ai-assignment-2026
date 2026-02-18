@@ -1,7 +1,146 @@
-"""
-Task 3: Train transformer model with share 15 54 3mo mean.
-Train/val on all but last calendar month; evaluate on last month.
-Save attention weights for a few examples; write task3_summary.md.
+"""Task 3: Train transformer model with share 15 54 3mo mean.
+
+This script trains a Transformer-based model that CAN use the 3-month rolling mean
+feature as input. The model uses attention mechanisms to capture feature interactions
+and provides interpretability through attention weights.
+
+Training Strategy
+-----------------
+- **Temporal split**: Train/val on all but last calendar month; test on last month
+- **Loss**: MSE (Mean Squared Error)
+- **Optimizer**: Adam with learning rate 5e-4
+- **Early stopping**: Based on validation RMSE (patience=12 epochs)
+- **Batch size**: 64 (default)
+
+Key Differences from Task 2
+----------------------------
+1. **Feature set**: Includes share_15_54_3mo_mean (10 features vs 9)
+2. **Model**: Transformer encoder vs MLP
+3. **Split strategy**: Last-month holdout vs time-based percentage split
+4. **Explainability**: Attention weights vs gradient importance
+
+Usage
+-----
+Basic training with defaults::
+
+    python src/train_task3.py
+
+Custom configuration::
+
+    python src/train_task3.py --epochs 80 --patience 12 --lr 5e-4 \\
+                               --batch_size 64 --val_frac 0.15
+
+Command-line Arguments
+----------------------
+--data_path : str, optional
+    Path to CSV data file (default: data/data.csv)
+--epochs : int, default=80
+    Maximum training epochs
+--patience : int, default=12
+    Early stopping patience (epochs without improvement)
+--batch_size : int, default=64
+    Training batch size
+--lr : float, default=5e-4
+    Learning rate for Adam optimizer
+--out_dir : str, default='models'
+    Directory to save trained model and artifacts
+--val_frac : float, default=0.15
+    Fraction of train data for validation (within train/val set)
+
+Example Output
+--------------
+Training run with synthetic data (5000 samples, 5 epochs)::
+
+    Loading data...
+    Features: ['hour', 'day_of_week', 'month', 'weekend', 'hour_sin', 
+               'hour_cos', 'dow_sin', 'dow_cos', 'channel_id_enc', 
+               'share_15_54_3mo_mean'], X.shape=(5000, 10)
+    Train 3699, Val 652, Test (last month) 649
+    Early stopping.
+    Last month metrics: {
+        'best_epoch': 2, 
+        'val_rmse': 3.1409832954047556, 
+        'test_rmse_last_month': 2.895919816809192, 
+        'test_mae_last_month': 2.337484836578369, 
+        'test_r2_last_month': -0.002093791961669922, 
+        'train_time_sec': 4.54, 
+        'n_params': 69185
+    }
+    MAE by channel (last month): {
+        'ch1': 2.274495511054993, 
+        'ch2': 2.353680218823383, 
+        'ch3': 2.176375092489277, 
+        'ch4': 2.5592480445063974
+    }
+    MAE by 3mo mean bucket: {
+        0: 2.336145527766301, 
+        1: 2.408216464996338, 
+        2: 2.147170259591305, 
+        3: 2.5131687394601325, 
+        4: 2.269360456059122
+    }
+    Wrote /path/to/docs/task3_summary.md
+
+Outputs
+-------
+The script saves the following artifacts to --out_dir:
+
+- **task3_best.pt** : Model checkpoint with state dict and metadata
+- **task3_scaler_X.pkl** : StandardScaler for feature normalization
+- **task3_channel_encoder.pkl** : LabelEncoder for channel IDs
+- **task3_scaler_3mo.pkl** : Scaler for 3-month mean feature
+- **task3_feature_names.json** : List of feature names in order
+- **task3_metrics.json** : Training and test metrics
+- **task3_attention_sample.json** : Sample attention weights for interpretation
+- **docs/task3_summary.md** : Human-readable summary report
+
+Model Performance Analysis
+--------------------------
+The script analyzes model performance by:
+1. **Channel**: MAE breakdown by each channel
+2. **3mo mean buckets**: MAE across quintiles of historical performance
+3. **Attention patterns**: Which features receive highest attention
+
+Typical metrics on synthetic data:
+- Test RMSE (last month): ~2.9
+- Test MAE (last month): ~2.3
+- Test R²: near 0 (synthetic data has little signal)
+- Training time: ~4.5 seconds (CPU)
+- Parameters: ~69K
+
+Explainability
+--------------
+Attention weights saved in task3_attention_sample.json show which features
+the model focuses on. Higher attention = stronger influence on prediction.
+
+Example attention pattern::
+
+    {
+      "feature_names": ["hour", "day_of_week", ..., "share_15_54_3mo_mean"],
+      "attention_by_example": [
+        {
+          "hour": 0.08,
+          "day_of_week": 0.09,
+          ...
+          "share_15_54_3mo_mean": 0.25  # highest attention
+        }
+      ]
+    }
+
+Implementation Notes
+--------------------
+- Last month split uses pandas DateOffset for calendar month boundaries
+- Validation set is temporal: last 15% of train/val period
+- Test set: last complete calendar month
+- Features standardized with StandardScaler (Z-score normalization)
+- 3mo mean feature scaled separately before joining
+- Early stopping monitors validation RMSE only
+
+See Also
+--------
+models_task3.py : TabularTransformer architecture
+train_task2.py : Alternative MLP-based training (Task 2)
+features.py : Feature engineering with 3mo mean
 """
 import argparse
 import json
@@ -29,7 +168,41 @@ def get_device():
 
 
 def last_month_split(df, X, y, timeslot_col):
-    """Split: train/val = all but last calendar month; test = last month."""
+    """Split data: train/val on all but last calendar month; test on last month.
+    
+    Ensures temporal ordering and prevents data leakage by holding out the
+    most recent complete calendar month for testing.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Full dataset with timeslot column.
+    X : np.ndarray
+        Feature matrix, shape (n_samples, n_features).
+    y : np.ndarray
+        Target values, shape (n_samples,).
+    timeslot_col : str
+        Name of datetime column in df.
+    
+    Returns
+    -------
+    X_train_val : np.ndarray
+        Features for training and validation (all but last month).
+    y_train_val : np.ndarray
+        Targets for training and validation.
+    X_test : np.ndarray
+        Features for test set (last month).
+    y_test : np.ndarray
+        Targets for test set.
+    test_mask : pd.Series
+        Boolean mask indicating test set rows in original df.
+    
+    Examples
+    --------
+    >>> X_tv, y_tv, X_test, y_test, mask = last_month_split(df, X, y, 'timeslot datetime from')
+    >>> print(f"Train+Val: {len(X_tv)}, Test: {len(X_test)}")
+    Train+Val: 4351, Test: 649
+    """
     df = df.copy()
     df["_ts"] = pd.to_datetime(df[timeslot_col], errors="coerce")
     last_ts = df["_ts"].max()
