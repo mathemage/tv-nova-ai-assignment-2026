@@ -75,7 +75,8 @@ Typical metrics on synthetic data:
 - Validation MAE: ~2.4
 - Training time: <1 second (CPU, 5000 samples)
 - Inference latency: ~0.1 ms per sample
-- Parameters: ~44K (MLPLarge), ~20K (MLP)
+- Parameters (for input_size=9, hidden_sizes=(128, 64)): ~44K (MLPLarge), ~9.6K (MLP)
+  Actual parameter counts depend on the chosen input dimensionality and hidden layer sizes.
 
 Notes
 -----

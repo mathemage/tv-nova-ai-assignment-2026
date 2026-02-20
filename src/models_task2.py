@@ -22,19 +22,19 @@ MLP:
     - Input → Linear(128) → ReLU → Dropout(0.1)
     - → Linear(64) → ReLU → Dropout(0.1) 
     - → Linear(1)
-    - Parameters: ~40K-50K depending on input size
+    - Parameters: e.g., ~9.6K for Task 2 default (input_size=9, hidden_sizes=(128, 64)); scales with input size and layer widths
     
 MLPLarge:
     - Input → Linear(256) → ReLU → Dropout(0.15)
     - → Linear(128) → ReLU → Dropout(0.15)
     - → Linear(64) → ReLU → Dropout(0.15)
     - → Linear(1)
-    - Parameters: ~60K-70K depending on input size
+    - Parameters: ~44K for the default config (input_size=9); scales with input size and layer widths
 
 LSTMModel:
     - Input projection → LSTM(hidden_size=64) → Linear(1)
     - Treats tabular features as sequence (simplified approach)
-    - Parameters: ~30K-40K depending on configuration
+    - Parameters: ~30K-40K for typical configurations; depends on input projection and sequence setup
 
 Notes
 -----
