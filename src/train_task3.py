@@ -129,11 +129,11 @@ Example attention pattern::
 
 Implementation Notes
 --------------------
-- Last month split uses pandas DateOffset for calendar month boundaries
+- Last month split uses pandas DateOffset anchored to the final timestamp
 - Validation set is temporal: last 15% of train/val period
-- Test set: last complete calendar month
+- Test set: last month relative to the final timestamp (may be partial if data ends mid-month)
 - Features standardized with StandardScaler (Z-score normalization)
-- 3mo mean feature scaled separately before joining
+- 3mo mean feature is first scaled separately; then all features (including it) are standardized together with StandardScaler
 - Early stopping monitors validation RMSE only
 
 See Also
@@ -168,10 +168,11 @@ def get_device():
 
 
 def last_month_split(df, X, y, timeslot_col):
-    """Split data: train/val on all but last calendar month; test on last month.
+    """Split data: train/val on all but the last calendar month segment; test on the last month.
     
     Ensures temporal ordering and prevents data leakage by holding out the
-    most recent complete calendar month for testing.
+    most recent calendar month in the data (from the start of that month up to the last timestamp),
+    which may be a partial month if the dataset ends mid-month.
     
     Parameters
     ----------

@@ -64,7 +64,7 @@ Notes
 - All preprocessing matches training pipeline exactly
 - Predictions are in the same scale as training targets
 - Fast inference: ~0.1ms per sample on CPU
-- Thread-safe for concurrent predictions
+- Function loads artifacts per call (no shared mutable state)
 
 See Also
 --------
