@@ -22,7 +22,7 @@ MLP:
     - Input → Linear(128) → ReLU → Dropout(0.1)
     - → Linear(64) → ReLU → Dropout(0.1) 
     - → Linear(1)
-    - Parameters: e.g., ~9.6K for Task 2 default (input_size=9, hidden_sizes=(128, 64)); scales with input size and layer widths
+    - Parameters: e.g., ~9.5K for Task 2 default (input_size=9, hidden_sizes=(128, 64)); scales with input size and layer widths
     
 MLPLarge:
     - Input → Linear(256) → ReLU → Dropout(0.15)
