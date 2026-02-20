@@ -129,11 +129,11 @@ Example attention pattern::
 
 Implementation Notes
 --------------------
-- Last month split uses pandas DateOffset anchored to the final timestamp
+- Last month split: holds out data from the start of the final calendar month to the last timestamp
 - Validation set is temporal: last 15% of train/val period
 - Test set: last month relative to the final timestamp (may be partial if data ends mid-month)
 - Features standardized with StandardScaler (Z-score normalization)
-- 3mo mean feature is first scaled separately; then all features (including it) are standardized together with StandardScaler
+- 3mo mean feature: first normalized separately with its own StandardScaler, then combined with other features and all standardized together
 - Early stopping monitors validation RMSE only
 
 See Also
