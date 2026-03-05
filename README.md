@@ -95,3 +95,9 @@ Nova TV Interview Assignment: data analysis, deep-learning and transformer-based
 - `docs/` – Task 1 conclusions, Task 2 summary, Task 3 summary.
 
 All work is executable locally (clone and run); no assumption on OS beyond Python and Docker.
+
+---
+
+## License
+
+This project is licensed under the [GNU Affero General Public License v3.0 or later](LICENSE) (`AGPL-3.0-or-later`).
