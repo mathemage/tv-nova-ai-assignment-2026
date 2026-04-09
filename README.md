@@ -1,5 +1,7 @@
 # Nova TV AI Assignment
 
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://choosealicense.com/licenses/agpl-3.0/)
+
 Nova TV Interview Assignment: data analysis, deep-learning and transformer-based prediction, containerization and orchestration.
 
 ## Requirements
